@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Node : MonoBehaviour
@@ -21,7 +22,7 @@ public class Node : MonoBehaviour
             UpdateLine();
         }
         localStep = step;
-        step += 1;
+        step += 1;  
     }
 
     // Update is called once per frame

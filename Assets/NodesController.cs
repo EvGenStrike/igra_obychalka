@@ -3,61 +3,82 @@ using System.Collections.Generic;
 
 public class NodesController : MonoBehaviour
 {
-
+    public SQLiteManager db;
+    public SourcesInfoDepiction sourcesInfoDepiction;
     public Node gamerNode;
-    // Приватное поле для хранения пути
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     private Stack<Node> path = new Stack<Node>();
+    private int previousSourceId = 0;
 
-    // Геттер для пути
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     public Stack<Node> Path
     {
         get { return path; }
     }
 
-    // Сеттер для пути (принимает новый стек и заменяет текущий)
+    public void startPath(){
+        Debug.Log($"starting path: {path.ToString()}");
+        foreach (var node in path)
+        {
+            Debug.Log($"node path: {node.gameObject.name}");
+            if (node.isSourceNode){
+                var source = db.GetSourceLevelById(node.sourceId);
+                Debug.Log($"source: {source}");
+                if (source == null){
+                    continue;
+                }
+                Debug.Log($"{node.gameObject.name} source title: {source.Title}");
+                sourcesInfoDepiction.changeInfo(source.Title, source.Description);
+                db.AddStudiedSource(node.sourceId);
+                Debug.Log($"source: {source}");
+            }
+        }
+    }
+
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     public void SetPath(Stack<Node> newPath)
     {
         path = newPath;
     }
 
-    // Метод для добавления ноды в путь
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
     public void AddNodeToPath(Node newNode)
     {
-        if (newNode != null && !path.Contains(newNode))  // Проверяем, что нода не null и ещё не в пути
+        if (newNode != null && !path.Contains(newNode))  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ null пїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
         {
-            path.Push(newNode);  // Добавляем элемент в стек
-            Debug.Log($"Нода {newNode.name} добавлена в путь.");
+            path.Push(newNode);  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
+            Debug.Log($"пїЅпїЅпїЅпїЅ {newNode.name} пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ.");
         }
         else
         {
-            Debug.LogWarning("Нода уже в пути или null.");
+            Debug.LogWarning("пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ null.");
         }
     }
 
-    // Метод для удаления последней ноды из пути и получения нового последнего элемента
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public Node RemoveLastNodeFromPath()
     {
-        if (path.Count > 0)  // Проверяем, что стек не пустой
+        if (path.Count > 0)  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         {
-            Node removedNode = path.Pop();  // Удаляем и возвращаем последний элемент
-            Debug.Log($"Нода {removedNode.name} удалена из пути.");
+            Node removedNode = path.Pop();  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            Debug.Log($"пїЅпїЅпїЅпїЅ {removedNode.name} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ.");
 
-            if (path.Count > 0)  // Если стек не пустой, получаем новый последний элемент
+            if (path.Count > 0)  // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             {
                 Node newLastNode = path.Peek();
-                Debug.Log($"Новая последняя нода в пути: {newLastNode.name}");
+                Debug.Log($"пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ: {newLastNode.name}");
                 return newLastNode;
             }
             else
             {
-                Debug.LogWarning("Стек пустой.");
-                return null;  // Если стек пустой, возвращаем null
+                Debug.LogWarning("пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
+                return null;  // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ null
             }
         }
         else
         {
-            Debug.LogWarning("Стек пустой.");
-            return null;  // Если стек пустой, возвращаем null
+            Debug.LogWarning("пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
+            return null;  // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ null
         }
     }
 

@@ -9,6 +9,9 @@ public class Node : MonoBehaviour
     public List<Node> connectedNodes = new List<Node>(); // Список нод, с которыми будет соединение
     public UnityEvent OnSwitchCliked;
     public LineRenderersManager lineRenderers;
+    public bool isSourceNode;
+    public int sourceId;
+    public bool isStartNode;
     private bool hasLineRendererConnections;
     private Button nodeButton;  // Ссылка на кнопку ноды
     public Node gamerNode;
@@ -61,13 +64,18 @@ public class Node : MonoBehaviour
 
     private void OnSwitchClikedEvent()
     {
-        Color targetColor = Color.white;
+        Color targetColor = nodeButton.GetComponent<Image>().color;
+        if (!isStartNode){
+            targetColor = Color.white;
+        }
 
 
         if (lastClickedNode == null && this == GetPlayerNode())
         {
             Debug.Log("1");
-            targetColor = new Color(0.6f, 0.6f, 0f);
+            if (!isStartNode){
+                targetColor = new Color(0.6f, 0.6f, 0f);
+            }
             nodesController.AddNodeToPath(this);
             lastClickedNode = this;
         }
@@ -83,14 +91,13 @@ public class Node : MonoBehaviour
         }
         else if (lastClickedNode != null && nodesController.Path.Contains(lastClickedNode))
         {
-            targetColor = new Color(0.6f, 0.6f, 0f);
-            Debug.Log("2");
-            if (!nodesController.Path.Contains(this))
-            {
-                nodesController.AddNodeToPath(this);
-                lineRenderers.SetPathLineRenderer(this, lastClickedNode);
-                lastClickedNode = this;
+            if (!isStartNode){
+                targetColor = new Color(0.6f, 0.6f, 0f);
             }
+            Debug.Log("2");
+            nodesController.AddNodeToPath(this);
+            lineRenderers.SetPathLineRenderer(this, lastClickedNode);
+            lastClickedNode = this;
         }
         nodeButton.GetComponent<Image>().color = targetColor;
 

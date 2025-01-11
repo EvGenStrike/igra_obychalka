@@ -173,7 +173,92 @@ public class SQLiteManager : MonoBehaviour
                 command.ExecuteNonQuery();
             }
 
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Sources (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        title TEXT,
+                        description TEXT,
+                        code_name TEXT
+                    )";
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Studied_sources (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        source_id INTEGER,
+                        FOREIGN KEY (source_id) REFERENCES Sources(id)
+                    )";
+                command.ExecuteNonQuery();
+            }
+
             Debug.Log("All tables created successfully.");
         }
     }
+
+    public Source GetSourceLevelById(int id)
+    {
+        Source source = null;
+
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+                // SQL-запрос для извлечения записи по id
+                command.CommandText = "SELECT * FROM Sources WHERE id = @id";
+                command.Parameters.AddWithValue("@id", id);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read()) // Если запись найдена
+                    {
+                        Debug.Log($"source was found!!!!");
+                        source = new Source
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Title = reader.GetString(reader.GetOrdinal("title")),
+                            Description = reader.GetString(reader.GetOrdinal("description")),
+                            CodeName = reader.GetString(reader.GetOrdinal("code_name"))
+                        };
+                    }
+                }
+            }
+        }
+
+        return source;
+    }
+
+    public void AddStudiedSource(int sourceId)
+    {
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+                // SQL-запрос для добавления записи в таблицу Studied_sources
+                command.CommandText = "INSERT INTO Studied_sources (source_id) VALUES (@source_id)";
+                command.Parameters.AddWithValue("@source_id", sourceId);
+
+                // Выполнение запроса
+                command.ExecuteNonQuery();
+            }
+        }
+
+        Debug.Log($"Record with source_id {sourceId} added to Studied_sources.");
+    }
+}
+
+public class Source
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string CodeName { get; set; }
 }
